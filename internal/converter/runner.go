@@ -12,6 +12,7 @@ func RunCommand(name string, args ...string) (string, error) {
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
+	hideConsoleWindow(cmd)
 
 	err := cmd.Run()
 	if err != nil {
