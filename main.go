@@ -26,7 +26,11 @@ func main() {
 		},
 		BackgroundColour: &options.RGBA{R: 31, G: 34, B: 40, A: 1},
 		OnStartup:        app.startup,
-		Frameless:        true,
+		SingleInstanceLock: &options.SingleInstanceLock{
+			UniqueId:               "pixpulse.icosmos.space",
+			OnSecondInstanceLaunch: app.onSecondInstanceLaunch,
+		},
+		Frameless: true,
 		DragAndDrop: &options.DragAndDrop{
 			EnableFileDrop: true,
 		},

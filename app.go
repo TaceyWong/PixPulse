@@ -11,6 +11,7 @@ import (
 
 	"PixPulse/internal/converter"
 
+	"github.com/wailsapp/wails/v2/pkg/options"
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -31,6 +32,17 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+}
+
+// onSecondInstanceLaunch runs when a second process is started; the first instance stays running.
+// See https://wails.golang.ac.cn/docs/guides/single-instance-lock/
+func (a *App) onSecondInstanceLaunch(data options.SecondInstanceData) {
+	if a.ctx == nil {
+		return
+	}
+	wailsRuntime.WindowUnminimise(a.ctx)
+	wailsRuntime.Show(a.ctx)
+	go wailsRuntime.EventsEmit(a.ctx, "secondInstance", data.Args, data.WorkingDirectory)
 }
 
 // SelectFile opens a native file dialog to select an image
