@@ -65,7 +65,7 @@ func (a *App) GetFileBase64(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	ext := filepath.Ext(path)
 	var mimeType string
 	switch ext {
@@ -105,7 +105,7 @@ func (a *App) OpenDirectory(path string) {
 		dir := filepath.Dir(absPath)
 		cmd = exec.Command("xdg-open", dir)
 	}
-	
+
 	// Execute without blocking
 	go cmd.Run()
 }
