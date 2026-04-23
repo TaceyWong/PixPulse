@@ -6,8 +6,33 @@
   --border-default: rgba(255, 255, 255, 0.1);
   --border-strong: rgba(255, 255, 255, 0.2);
   --surface-subtle: rgba(255, 255, 255, 0.03);
+  --surface-header: rgba(255, 255, 255, 0.02);
+  --surface-pattern: rgba(255, 255, 255, 0.02);
+  --surface-footer: rgba(0, 0, 0, 0.1);
   --surface-hover: rgba(255, 255, 255, 0.08);
+  --logo-invert: 0;
+  --logo-glow: rgba(255, 255, 255, 0.3);
+  --image-shadow: rgba(0, 0, 0, 0.7);
+  --error-color: #ff5d5d;
   --accent-blue: rgba(59, 130, 246, 0.5);
+}
+
+[data-theme='light'] {
+  --bg-color: #f5f7fb;
+  --text-primary: #111827;
+  --text-secondary: rgba(17, 24, 39, 0.72);
+  --text-muted: rgba(17, 24, 39, 0.5);
+  --border-default: rgba(17, 24, 39, 0.12);
+  --border-strong: rgba(17, 24, 39, 0.22);
+  --surface-subtle: rgba(255, 255, 255, 0.6);
+  --surface-header: rgba(17, 24, 39, 0.04);
+  --surface-pattern: rgba(17, 24, 39, 0.03);
+  --surface-footer: rgba(17, 24, 39, 0.03);
+  --surface-hover: rgba(17, 24, 39, 0.06);
+  --logo-invert: 1;
+  --logo-glow: rgba(17, 24, 39, 0.2);
+  --image-shadow: rgba(17, 24, 39, 0.25);
+  --error-color: #dc2626;
 }
 
 * {

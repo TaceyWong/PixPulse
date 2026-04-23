@@ -16,6 +16,13 @@ const isProcessing = ref(false);
 const status = ref('');
 const error = ref('');
 const isDragOver = ref(false);
+const theme = ref<'light' | 'dark'>('dark');
+let themeMediaQuery: MediaQueryList | null = null;
+
+const applyTheme = (nextTheme: 'light' | 'dark') => {
+  theme.value = nextTheme;
+  document.documentElement.setAttribute('data-theme', nextTheme);
+};
 
 const updatePreviews = async () => {
   if (inputPath.value) {
@@ -71,6 +78,8 @@ const handleDrop = (x: number, y: number, paths: string[]) => {
 };
 
 onMounted(() => {
+  themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  applyTheme(themeMediaQuery.matches ? 'dark' : 'light');
   setTimeout(() => {
     runtime.OnFileDrop(handleDrop, true);
   }, 300);
@@ -78,6 +87,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   runtime.OnFileDropOff();
+  themeMediaQuery = null;
 });
 
 const handleSelectFile = async () => {
@@ -154,8 +164,10 @@ const setMode = (m: Mode) => {
 };
 
 const minimize = () => runtime.WindowMinimise();
-const toggleMaximize = () => runtime.WindowToggleMaximise();
 const quit = () => runtime.Quit();
+const toggleTheme = () => {
+  applyTheme(theme.value === 'dark' ? 'light' : 'dark');
+};
 </script>
 
 <template>
@@ -167,8 +179,19 @@ const quit = () => runtime.Quit();
       </div>
       
       <div class="window-controls" style="--wails-draggable: none">
-        <button class="win-btn maximize" title="全屏/恢复" @click="toggleMaximize">
-          <span class="icon"></span>
+        <button
+          class="theme-switch"
+          :class="{ 'is-light': theme === 'light' }"
+          :title="theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'"
+          role="switch"
+          :aria-checked="theme === 'light'"
+          @click="toggleTheme"
+        >
+          <span class="theme-switch-track">
+            <span class="theme-switch-icon theme-switch-icon-moon" aria-hidden="true"></span>
+            <span class="theme-switch-icon theme-switch-icon-sun" aria-hidden="true"></span>
+            <span class="theme-switch-thumb"></span>
+          </span>
         </button>
         <button class="win-btn minimize" title="最小化" @click="minimize">
           <span class="icon"></span>
@@ -239,7 +262,7 @@ const quit = () => runtime.Quit();
 
 <style scoped>
 .app-wrapper { display: flex; flex-direction: column; height: 100vh; background-color: var(--bg-color); border: 1px solid var(--border-default); user-select: none; }
-.title-bar { height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: rgba(255, 255, 255, 0.03); }
+.title-bar { height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: var(--surface-subtle); }
 .brand-container {
   display: flex;
   align-items: center;
@@ -248,28 +271,109 @@ const quit = () => runtime.Quit();
 .logo {
   height: 18px;
   width: auto;
-  filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
+  filter: invert(var(--logo-invert)) drop-shadow(0 0 2px var(--logo-glow));
 }
 .brand { font-size: 11px; letter-spacing: 3px; opacity: 0.6; }
 .window-controls { display: flex; gap: 8px; align-items: center; }
-.win-btn { width: 12px; height: 12px; border-radius: 50%; border: none; padding: 0; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; }
+.theme-switch {
+  width: 48px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.theme-switch-track {
+  width: 46px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid var(--border-default);
+  background: var(--surface-subtle);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.theme-switch:hover .theme-switch-track {
+  border-color: var(--border-strong);
+}
+.theme-switch-icon {
+  width: 10px;
+  height: 10px;
+  z-index: 1;
+  position: relative;
+  opacity: 0.45;
+  transition: opacity 0.2s;
+}
+.theme-switch-icon-moon {
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  color: var(--text-primary);
+}
+.theme-switch-icon-moon::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  top: -2px;
+  left: 3px;
+  background: var(--surface-subtle);
+}
+.theme-switch-icon-sun {
+  border-radius: 50%;
+  background: currentColor;
+  color: var(--text-muted);
+}
+.theme-switch-icon-sun::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+}
+.theme-switch.is-light .theme-switch-icon-moon {
+  color: var(--text-muted);
+  opacity: 0.35;
+}
+.theme-switch.is-light .theme-switch-icon-sun {
+  color: var(--text-primary);
+  opacity: 1;
+}
+.theme-switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  transition: transform 0.2s ease;
+}
+.theme-switch.is-light .theme-switch-thumb {
+  transform: translateX(24px);
+}
+.win-btn { width: 14px; height: 14px; border-radius: 50%; border: none; padding: 0; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; }
 .win-btn .icon { opacity: 0; transition: opacity 0.2s; pointer-events: none; }
 .window-controls:hover .win-btn .icon { opacity: 0.6; }
 .win-btn:hover { opacity: 0.8; }
 .win-btn.close { background-color: #ff5f56; border: 0.5px solid #e0443e; }
 .win-btn.minimize { background-color: #ffbd2e; border: 0.5px solid #dea123; }
-.win-btn.maximize { background-color: #27c93f; border: 0.5px solid #1aab29; }
-.win-btn.close .icon::before { content: "×"; color: #4c0000; font-size: 10px; font-weight: bold; }
-.win-btn.minimize .icon::before { content: ""; width: 6px; height: 1px; background: #995700; display: block; }
-.win-btn.maximize .icon::before { content: ""; width: 6px; height: 6px; border: 1px solid #006500; display: block; clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 15% 15%, 15% 85%, 85% 85%, 85% 15%, 15% 15%); }
+.win-btn.close .icon::before { content: "×"; color: #4c0000; font-size: 11px; font-weight: bold; }
+.win-btn.minimize .icon::before { content: ""; width: 7px; height: 1.5px; background: #995700; display: block; }
 .container { flex: 1; display: flex; flex-direction: column; padding: 24px 32px 32px; overflow: hidden; }
 .main-layout { flex: 1; display: flex; gap: 24px; align-items: stretch; }
 .preview-panel { flex: 1; display: flex; flex-direction: column; border: 1px solid var(--border-default); background: var(--surface-subtle); border-radius: 4px; overflow: hidden; min-width: 0; }
-.panel-header { padding: 12px 16px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-default); color: var(--text-muted); font-size: 9px; letter-spacing: 1px; }
+.panel-header { padding: 12px 16px; background: var(--surface-header); border-bottom: 1px solid var(--border-default); color: var(--text-muted); font-size: 9px; letter-spacing: 1px; }
 .preview-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; cursor: pointer; transition: background 0.2s; position: relative; }
 .preview-content:hover { background: var(--surface-hover); }
-.preview-panel.empty .preview-content { background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.02) 10px, rgba(255,255,255,0.02) 20px); }
-.preview-img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 4px 24px rgba(0,0,0,0.7)); }
+.preview-panel.empty .preview-content { background: repeating-linear-gradient(45deg, transparent, transparent 10px, var(--surface-pattern) 10px, var(--surface-pattern) 20px); }
+.preview-img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 4px 24px var(--image-shadow)); }
 .placeholder { display: flex; flex-direction: column; align-items: center; gap: 12px; pointer-events: none; }
 .center-controls { width: 100px; display: flex; flex-direction: column; justify-content: center; gap: 32px; }
 .mode-stack { display: flex; flex-direction: column; gap: 8px; }
@@ -279,13 +383,13 @@ const quit = () => runtime.Quit();
 .execute-btn { background: transparent; border: 1px solid var(--text-primary); color: var(--text-primary); height: 100px; cursor: pointer; font-size: 13px; }
 .execute-btn:hover:not(:disabled) { background: var(--text-primary); color: var(--bg-color); }
 .execute-btn:disabled { opacity: 0.05; }
-.panel-actions, .panel-actions-placeholder { height: 48px; border-top: 1px solid var(--border-default); background: rgba(0,0,0,0.1); }
+.panel-actions, .panel-actions-placeholder { height: 48px; border-top: 1px solid var(--border-default); background: var(--surface-footer); }
 .panel-actions { padding: 8px; display: flex; gap: 8px; }
 .panel-actions-placeholder { background: transparent; border-top-color: transparent; }
 .actions-empty { flex: 1; }
 .ghost-btn { flex: 1; background: transparent; border: 1px solid var(--border-strong); color: var(--text-secondary); padding: 0 8px; font-size: 9px; cursor: pointer; border-radius: 2px; height: 100%; }
 .ghost-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
 .status-footer { margin-top: 24px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-default); padding-top: 16px; }
-.status-wrap.is-error { color: #ff4444; }
+.status-wrap.is-error { color: var(--error-color); }
 .path-info { max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.2; font-size: 10px; }
 </style>

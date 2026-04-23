@@ -18,9 +18,14 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "PixPulse",
-		Width:  600,
-		Height: 400,
+		Title:       "PixPulse",
+		Width:       600,
+		Height:      400,
+		MinWidth:    600,
+		MinHeight:   400,
+		MaxWidth:    600,
+		MaxHeight:   400,
+		AlwaysOnTop: true,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

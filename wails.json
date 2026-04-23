@@ -9,5 +9,11 @@
   "author": {
     "name": "王新勇(Tacey Wong)",
     "email": "xinyong.w@gmail.com"
+  } ,"info": {
+    "companyName": "白昼寻星工作室",
+    "productName": "PixPulse",
+    "productVersion": "1.0.0",
+    "copyright": "Copyright 2026 白昼寻星工作室",
+    "comments": "PixPulse:PNG to Color/B&W SVG and SVG to PNG"
   }
 }
